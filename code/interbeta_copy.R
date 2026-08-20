@@ -19,7 +19,7 @@ recode_map_nodes<-c(
   "Combined Costs and Benefits (Favorable / Unfavorable) "="costs_benefits_node",
   "Deployable in a Reasonable Timeframe "="reasonable_deployment",
   "Will the Control Tool Be Successful? "="successful_tool",
-  "Social Acceptance"="social_acceptance"
+  "Social Acceptance "="social_acceptance"
   
 )
 
@@ -45,8 +45,10 @@ process_response_bestworst<-function(response){
 
 processed_bestworst_responses<-map(responses_list, ~process_response_bestworst(.x))
 
-#Ok now have a list of the best and worst responses processed 
+#Ok now have a list of the best and worst responses processed. Need to apply the function to get beta params
 
+#Bind into single df for later processing:
+bound_data_bestworst<-bind_rows(processed_bestworst_responses,.id="respondent")
 #==================================================================
 # Helper functions -- left these untouched from Mike's code 
 #==================================================================
@@ -83,6 +85,20 @@ kld_beta<-function(p=NULL,
 best_case<-c(0.95,0.04,0.01)
 worst_case<- c(0.05,0.15,0.8)
 
+#making this a functionalized version of mike's code that takes as its input each of the questions posed by each of the experts:
+build_cpts<-function(x){ #takes as its argument the node of interest (i.e. social_acceptance)
+  
+  #uses the data stored in bound_data_bestworst df: 
+  bound_data_bestworst %>% 
+    filter(node==x) ->node_data  #filter to node of interest
+  
+  #now have to pull out best and worst values for each expert:
+  for (i in unique(node_data$respondent)){
+    respondent_dat<-node_data[respondent==i,]
+    
+  }
+  
+####  ----- what follows is mike's code, unadulterated: 
 grd<-expand.grid(alpha=seq(0,15, by=0.1), beta=seq(0,15,by=0.1))
 # Grid search to find some reasonable starts to fit the beta 
 grd$best<-sapply(seq.int(nrow(grd)), function(x,case_dat) {
